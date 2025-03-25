@@ -22,22 +22,35 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 2. **Configure the Raspberry Pi**
 
 -   Connect to the Pi, either via HDMI + keyboard, SSH or Serial
--   Copy the `piemucd.py` to the home folder of your user
--   Add `sudo python3 ~/piemucd.py` to the end of `~/.profile` to have the script start up on login
--   Set up the user to automatically login on startup using `sudo raspi-config`
+-   Create a folder for the USBODE `sudo mkdir -p /opt/usbode`
+-   Copy the `piemucd.py` to the folder
 -   Install flask `sudo apt-get install python3-flask`
+-   Add the following file to (will need sudo access)`/lib/systemd/system/usbode.service`
+```
+[Unit]
+Description=USBODE
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/usbode/piemucd.py
+StandardInput=tty-force
+
+[Install]
+WantedBy=multi-user.target
+```
+-   Reload the systemd service `sudo systemctl daemon-reload`
+-   Start the service automatically `sudo systemctl start usbode.service`
+-   To check the status of the service type `sudo systemctl status usbode.service`
+-   To stop the service type `sudo systemctl stop usbode.service`
+-   If you need to debug everything entirely make sure the service is stopped, then navigate to `/opt/usbode` and execute the script with `sudo python3 piemucd.py`. Once you are done debugging, type exit at the shell and that will gracefully close off the script.
 
 3. Main interface
 
--   When PiEmuCD is run, it automatically starts up in CD emulation mode. If no `to-be-mounted.txt` file is present on the root of the image store partition, the operation will fail.
--   PiEmuCD has it's own command interface with few commands supported. Type `help` to get a list of all available commands.
--   `switch` will switch modes, `switch cdrom` will switch to CD-ROM emulation mode and `switch store` will switch to the image store being mounted on the virtual USB drive.
-
-4. "To be mounted" file
-
--   The `to-be-mounted.txt` file specified which of the images on the image store should be mounted in CD-ROM emulation mode.
--   A sample file is provided in the repository.
--   File is placed inside of `/opt/usbide` (the folder will need to be created by `sudo mkdir -p /opt/usbide` then `sudo chgrp -R 1000 /opt/usbode` and finally `sudo chmod 664 /opt/usbode/*.txt` )
+-  The USBODE interface will take about 30 seconds to startup, once configured.
+-  For Initial setup, follow instructions at `http://<IPAddress>/setup`
+-  Once the first image is mounted, everything is controlled via web, navigate to `http://<IPAddress>` or http://<name from preconfigured hostname in step 1>
 
 ## Llama-ITX Notes
 1. This works best with only a single ISO file being loaded
@@ -50,7 +63,6 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 Since finding this project, I have the following todos:
 - Mount Bin/Cue files to support CDDA 
 - Figure out a way to copy ISOs over the network
-- Create a web interface to manage which disc image is loaded
 
 ## Strech goal:
 Maybe create a method to change the ISO through a DOS program or TSR (I have no experience with this though)

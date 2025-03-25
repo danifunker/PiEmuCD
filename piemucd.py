@@ -36,7 +36,7 @@ def index():
 @app.route('/switch')  
 def switch():
     switch_mode()
-    return 'Switching mode... <br> <a href='/'>Return to USBODE homepage</a>'
+    return f'Switching mode... Current mode is {current_mode} (1=CD-Emulator, 2=ExFAT mode)<br><br><a href="/switch">Need to switch modes again?</a><br><br><a href="/setup">Return to Setup</a><br><br> <a href="/">Return to USBODE homepage</a>'
 @app.route('/list')
 def listFiles():
     fileList=list_images()
@@ -54,6 +54,16 @@ def mountFile(file):
 def shutdown():
     start_shutdown()
     return f"Shutting down the pi now"
+@app.route('/setup')
+def setup():
+    fileList=list_images()
+    if len(fileList) < 1:
+        return f"No images found in {store_mnt}. Please add at least one ISO image and try again. <br>Adding images requires ExFAT support, connect this device to a system that supports ExFAT, then <a href='/switch'> switch modes</a> <br><br><a href='/shutdown'>Shutdown the pi</a>"
+    else:
+        response=""
+        for file in fileList:
+            response+=f"<a href='/mount/{file}'>{file}</a><br><br>"
+        return f"Current File Loaded: NONE (First Setup!)<br><br>To load a different ISO, select it. Be aware the system will disconnect and reconnect the optical drive.<br><br> {response} <br> <a href='/'>Return to USBODE homepage</a>"
 
 # Set up GPIO
 led_mode = gpiozero.LED(26)

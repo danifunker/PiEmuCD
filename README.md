@@ -36,3 +36,4 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 
 -   The `to-be-mounted.txt` file specified which of the images on the image store should be mounted in CD-ROM emulation mode.
 -   A sample file is provided in the repository.
+-   File is placed at the root of the image store beside the ISOs

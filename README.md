@@ -37,3 +37,21 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 -   The `to-be-mounted.txt` file specified which of the images on the image store should be mounted in CD-ROM emulation mode.
 -   A sample file is provided in the repository.
 -   File is placed at the root of the image store beside the ISOs
+
+## Llama-ITX Notes
+1. This works best with only a single ISO file being loaded
+2. If booting from scratch, on my Pi Zero 2 W it takes about 45 seconds to boot up into the ISO, so if you are cold booting the Llama and want to boot from disk, wait a bit in the BIOS screen. 
+3. Only a single USB is required to be connected to the Pi Zero 2 W for this application (so far) it CAN work with the data-only connection (USB Port closer to the HDMI/MicroSD slots)
+4. When operating in storage mode, be reminded this is an interface via ExFAT, so it will not be possible to access the filesystem on Operating Systems priror to Windows XP with the hotfix installed.
+
+
+## Todo
+Since finding this project, I have the following todos:
+- Mount Bin/Cue files to support CDDA 
+- Figure out a way to copy ISOs over the network
+- Create a web interface to manage which disc image is loaded
+
+## Strech goal:
+Maybe create a method to change the ISO through a DOS program or TSR (I have no experience with this though)
+
+Feel free to contribue to the project.

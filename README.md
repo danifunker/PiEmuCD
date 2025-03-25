@@ -25,6 +25,7 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 -   Copy the `piemucd.py` to the home folder of your user
 -   Add `sudo python3 ~/piemucd.py` to the end of `~/.profile` to have the script start up on login
 -   Set up the user to automatically login on startup using `sudo raspi-config`
+-   Install flask `sudo apt-get install python3-flask`
 
 3. Main interface
 
@@ -36,7 +37,7 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 
 -   The `to-be-mounted.txt` file specified which of the images on the image store should be mounted in CD-ROM emulation mode.
 -   A sample file is provided in the repository.
--   File is placed at the root of the image store beside the ISOs
+-   File is placed inside of `/opt/usbide` (the folder will need to be created by `sudo mkdir -p /opt/usbide` then `sudo chgrp -R 1000 /opt/usbode` and finally `sudo chmod 664 /opt/usbode/*.txt` )
 
 ## Llama-ITX Notes
 1. This works best with only a single ISO file being loaded

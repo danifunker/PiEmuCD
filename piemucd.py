@@ -5,14 +5,21 @@ import time
 import subprocess
 import os
 import shutil
+from pathlib import Path
+from flask import Flask
+from threading import Thread
+import time
+import glob
+import socket
 
 def version():
     print("PiEmuCD - Turn your Pi Zero into one or more virtual USB CD-ROM drives!")
     print("Made by RaduTek 2022: https://github.com/RaduTek/PiEmuCD\n")
+    print("Web Functionality added by Danifunker: https://github.com/danifunker/PiEmuCD\n")
 
 store_dev = '/dev/mmcblk0p3'
 store_mnt = '/mnt/imgstore'
-to_mount_file = 'to-be-mounted.txt'
+to_mount_file = '/opt/usbode/to-be-mounted.txt'
 update_file = 'update-piemucd.py'
 allow_update_from_store = True
 
@@ -21,6 +28,32 @@ store_mounted = False
 emu_mode = 1 # 0: Disabled; 1: CD-ROM; 2: Image Store
 current_mode = 1
 
+# Set up Flask webserver
+app = Flask(__name__)
+@app.route('/')
+def index():
+    return f"Welcome to USBODE, the USB Optical Drive Emulator!<br> My IP address is {socket.gethostbyname((socket.gethostname() + '.local'))}. <br> I am currently running from {os.path.abspath(__file__)} .<br>To switch modes click here: <a href='/switch'>/switch</a> <br> Current Image mounted are: {mounts_list}. <br> Current Mode is: {current_mode} <br> <a href='/list'>Load Another Image</a><br><br><br><br><a href='/shutdown'>Shutdown the pi</a>"
+@app.route('/switch')  
+def switch():
+    switch_mode()
+    return 'Switching mode... <br> <a href='/'>Return to USBODE homepage</a>'
+@app.route('/list')
+def listFiles():
+    fileList=list_images()
+    response=""
+    for file in fileList:
+        response+=f"<a href='/mount/{file}'>{file}</a><br><br>"
+    return f"Current File Loaded: {mounts_list}<br><br>To load a different ISO, select it. Be aware the system will disconnect and reconnect the optical drive.<br><br> {response} <br> <a href='/'>Return to USBODE homepage</a>"
+@app.route('/mount/<file>')
+def mountFile(file):
+    mount_new_image(file, to_mount_file)
+    switch_store()
+    switch_cdrom()
+    return f"Attempting to mount {file}...<br> <a href='/'>Return to USBODE homepage</a>"
+@app.route('/shutdown')
+def shutdown():
+    start_shutdown()
+    return f"Shutting down the pi now"
 
 # Set up GPIO
 led_mode = gpiozero.LED(26)
@@ -146,6 +179,24 @@ def enable_cdrom(mount_args):
         print("done!")
         return True
 
+def list_images():
+    fileList = []
+    print(f"Listing images in {store_mnt}...")
+    dir_list=os.listdir(store_mnt)
+    for file in dir_list:
+        if file.endswith(".iso") and not (file.startswith("._")): 
+            fileList.append(file)
+            print(file)
+    print(f"Found {len(fileList)} files")
+    return fileList
+
+def mount_new_image(name, to_mount_file):
+    if name.find(" "): 
+        name = '"' + name + '"'
+    f = open(to_mount_file, "w")
+    f.write(f"removable cdrom {name}" + "\n")
+    f.close()
+    
 
 # Enable mass storage mode to edit the image store
 def enable_store():
@@ -210,8 +261,8 @@ def unmount_store():
 # Gets the list of image files to mount
 # from the to_mount_file in the root of the image store
 def get_images_to_mount():
-    to_mount_file_path = os.path.join(store_mnt, to_mount_file)
-    print("Loading list of images to be mounted...")
+    to_mount_file_path = to_mount_file
+    print(f"Loading list of images to be mounted... ({to_mount_file_path})")
     if (os.path.isfile(to_mount_file_path)):
         with open(to_mount_file_path , 'r') as file:
             images = {
@@ -221,17 +272,19 @@ def get_images_to_mount():
                 'ro': [],
                 'nofua': []
             }
+            global mounts_list
+            mounts_list=[]
             mount_list = file.readlines()
             mount_count = 0
             for mount_item in mount_list:
                 mount_item = mount_item.strip(" \n\r\t")
-
                 # Exclude comments
                 if mount_item[0] == '#':
                     continue
                 if '#' in mount_item:
                     comment_start = mount_item.index('#')
                     mount_item = mount_item[0:comment_start]
+                
                 mount_item = mount_item.strip(' ')
 
                 mount_words = mount_item.split(' ')
@@ -252,6 +305,8 @@ def get_images_to_mount():
                     continue
 
                 mount_count += 1
+                mounts_list.append(file_path)
+
                 print(f"Mount item {mount_count}: {mount_item}")
 
                 # Check image mount arguments
@@ -307,7 +362,6 @@ def switch_cdrom():
         led_act_state('error')
         print("Switching to CD-ROM mode failed!")
     current_mode = 1
-
 
 # Switch to mass storage mode to edit the image store
 def switch_store():
@@ -367,15 +421,22 @@ help_cmds = [
     ['update', f'Check for update script ({update_file}) on the image store']
 ]
 
+def start_flask():
+    print("Starting Flask server...")
+    app.run(host='0.0.0.0', port=80)
+
 def main():
     version()
-
+    daemon = Thread(target=start_flask, daemon=True, name='Server')
+    daemon.start()    
+    
     time.sleep(.5)  # Delay for previous version script to exit
 
     # Start CD mode
     switch_cdrom()
 
     # Simple command interpreter
+    print(f"\nConnect to http://{socket.gethostbyname((socket.gethostname() + '.local'))}:80 from a remote machine")
     print("\nType 'help' for a list of commands.")
     while True:
         cmd = input("piemucd> ")
@@ -430,3 +491,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

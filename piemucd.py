@@ -41,6 +41,8 @@ def switch():
 def listFiles():
     fileList=list_images()
     response=""
+    if {current_mode == 2}:
+        response+="The USBODE cannot scan the files in ExFAT mode. <a href='/switch'>Switch Modes</a>, then go back to this page.<br><br>"
     for file in fileList:
         response+=f"<a href='/mount/{file}'>{file}</a><br><br>"
     return f"Current File Loaded: {mounts_list}<br><br>To load a different ISO, select it. Be aware the system will disconnect and reconnect the optical drive.<br><br> {response} <br> <a href='/'>Return to USBODE homepage</a>"
@@ -194,7 +196,7 @@ def list_images():
     print(f"Listing images in {store_mnt}...")
     dir_list=os.listdir(store_mnt)
     for file in dir_list:
-        if file.endswith(".iso") and not (file.startswith("._")): 
+        if file.lower().endswith(".iso") and not (file.startswith("._")): 
             fileList.append(file)
             print(file)
     print(f"Found {len(fileList)} files")
@@ -501,4 +503,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

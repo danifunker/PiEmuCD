@@ -41,7 +41,8 @@ StandardInput=tty-force
 WantedBy=multi-user.target
 ```
 -   Reload the systemd service `sudo systemctl daemon-reload`
--   Start the service automatically `sudo systemctl start usbode.service`
+-   Start the service  `sudo systemctl start usbode.service`
+-   Enable the service to start automatically on boot `sudo systemctl enable usbode.service`
 -   To check the status of the service type `sudo systemctl status usbode.service`
 -   To stop the service type `sudo systemctl stop usbode.service`
 -   If you need to debug everything entirely make sure the service is stopped, then navigate to `/opt/usbode` and execute the script with `sudo python3 piemucd.py`. Once you are done debugging, type exit at the shell and that will gracefully close off the script.

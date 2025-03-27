@@ -2,7 +2,7 @@
 
 ### Turn your Pi Zero into one or more virtual USB CD-ROM drives!
 
-PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn your Raspberry Pi Zero (W) into one or more emulated USB CD-ROM drives.
+PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn your Raspberry Pi Zero (W) or aspberry Pi Zero 2 (W) into one or more emulated USB CD-ROM drives.
 
 **Documentation is a work in progress.**
 
@@ -12,6 +12,7 @@ PiEmuCD is a Python script that uses the Linux USB Gadget kernel modules to turn
 
 -   Flash Raspberry Pi OS Lite (Bullseye) to an SD Card (16 GB minimum recommended size)
     -   Use the Pi Imager tool to preconfigure hostname, login and locale
+    -   If configuring wifi, remember, Pi Zero W and Zero 2 W models only supports 2.4ghz networks up to Wireless-N standards
 -   Use a partitioning tool to:
     -   Extend system partition to 4 GiB
     -   Create new partition, exFAT for the rest of the SD card -> this partition is called the **image store**.
@@ -51,7 +52,13 @@ WantedBy=multi-user.target
 
 -  The USBODE interface will take about 30 seconds to startup, once configured.
 -  For Initial setup, follow instructions at `http://<IPAddress>/setup`
--  Once the first image is mounted, everything is controlled via web, navigate to `http://<IPAddress>` or http://<name from preconfigured hostname in step 1>
+-  Once the first image is mounted, e
+-  Everything is controlled via web, navigate to `http://<IPAddress>` or http://<name from preconfigured hostname in step 1>
+
+4. Adding files via Network / wifi  -- This is limited to Wi-Fi N speeds (or slower)
+   a. Make sure the device is in Mode 1 (ISO serving mode)
+   b. Use an ssh / sftp client to connect to `<IPAddress>`. Nagivate to `/mnt/imgstore`. Drop files here
+   c. To load the new file use the web interface. The file list is refereshed every time the `/setup` or `/list` is accessed.
 
 ## Llama-ITX Notes
 1. This works best with only a single ISO file being loaded
@@ -63,7 +70,6 @@ WantedBy=multi-user.target
 ## Todo
 Since finding this project, I have the following todos:
 - Mount Bin/Cue files to support CDDA 
-- Figure out a way to copy ISOs over the network
 
 ## Strech goal:
 Maybe create a method to change the ISO through a DOS program or TSR (I have no experience with this though)

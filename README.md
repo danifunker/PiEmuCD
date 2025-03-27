@@ -67,6 +67,11 @@ WantedBy=multi-user.target
 4. When operating in storage mode, be reminded this is an interface via ExFAT, so it will not be possible to access the filesystem on Operating Systems priror to Windows XP with the hotfix installed.
 
 
+## Known Limitations
+DOS - Due to limitations in `USBASPI1.SYS` switching the image requires a reboot. This is due to the way how the Pi handles the image swap (it disconnected and reconnects it when swapping images), and the driver doesn't support disconnect/reconnection.
+
+This has been tested up to USBASPI 2.27.
+
 ## Todo
 Since finding this project, I have the following todos:
 - Mount Bin/Cue files to support CDDA 

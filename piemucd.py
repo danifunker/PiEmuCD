@@ -228,7 +228,7 @@ def enable_store():
 
 
 # Mount the image store on the local system
-def mount_store(rw: bool = False):
+def mount_store(rw: bool = True):
     global store_mounted
     prints(f"Mounting image store{' as writeable' if rw else ''}...")
     if store_mounted or os.path.ismount(store_mnt):
@@ -240,7 +240,8 @@ def mount_store(rw: bool = False):
     args = ['mount']
     if not rw:
         args.extend(['-o', 'ro'])
-    args.extend([store_dev, store_mnt])
+    args.extend([store_dev, store_mnt, "-o", "umask=000"])
+    print(f"Running command: {args}")
     p = subprocess.run(args)
     if p.returncode != 0:
         print("failed!")
